@@ -1,5 +1,5 @@
 {
-    "name":"RTK NTRIP",
+    "name":"NTRIP",
     "description":"Real-Time Kinematic positioning with NTRIP corrections",
     "icon":"mdi-satellite-variant",
     "company":"BlueOS Community",
