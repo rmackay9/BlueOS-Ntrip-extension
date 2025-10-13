@@ -853,7 +853,7 @@ class RTKController(Controller):
             location = await self._get_vehicle_location()
             
             if location is None:
-                raise Exception("No GPS location available from vehicle - need 3D fix for NTRIP")
+                raise Exception("No GPS location available from vehicle")
             
             lat, lon, alt = location
             
