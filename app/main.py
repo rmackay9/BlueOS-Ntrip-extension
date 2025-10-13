@@ -4,13 +4,11 @@ import asyncio
 import requests
 import logging.handlers
 import json
-import socket
 import base64
 import aiohttp
 import argparse
 import sys
 import time
-import math
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional
