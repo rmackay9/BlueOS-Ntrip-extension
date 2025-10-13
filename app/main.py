@@ -288,7 +288,7 @@ class RTKController(Controller):
                 "alt": alt
             }
             status['vehicle_location_time'] = datetime.utcfromtimestamp(self._vehicle_location_update).isoformat() + 'Z'
-        
+
         # Add GGA send status
         if self._last_gga_time > 0:
             status['last_gga_sent_time'] = datetime.utcfromtimestamp(self._last_gga_time).isoformat() + 'Z'
@@ -481,7 +481,7 @@ class RTKController(Controller):
 
             # Check response - handle both NTRIP v1 (ICY 200 OK) and v2 (HTTP/1.x 200 OK)
             response_is_ok = (b"200 OK" in response or b"ICY 200 OK" in response)
-            
+
             if not response_is_ok:
                 # Read more response lines for better debugging
                 additional_lines = []
@@ -835,7 +835,7 @@ class RTKController(Controller):
             if not self._gps_fetch_logged:
                 print(f"❌ GPS fetch error: {e}")
                 self._gps_fetch_logged = True
-            
+
             # On error, use cached location if available
             if self._vehicle_location:
                 return self._vehicle_location
@@ -844,24 +844,22 @@ class RTKController(Controller):
 
     async def _send_gga_message(self, writer) -> None:
         """Send GGA message to NTRIP server to report location
-        
+
         Many NTRIP servers require periodic location updates to maintain the connection.
         This sends a GGA NMEA message with the current vehicle location from GPS.
         """
         try:
             # Get current vehicle location
             location = await self._get_vehicle_location()
-            
             if location is None:
                 raise Exception("No GPS location available from vehicle")
-            
             lat, lon, alt = location
-            
+
             gga_message = generate_gga_message(lat, lon, alt)
             writer.write(gga_message)
             await writer.drain()
             self._last_gga_time = time.time()
-            
+
         except Exception as e:
             raise Exception(f"Failed to send GGA message: {e}")
 
