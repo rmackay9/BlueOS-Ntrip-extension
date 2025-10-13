@@ -41,7 +41,6 @@ class RTKStatus(BaseModel):
     bytes_received: int = 0
     error_message: Optional[str] = None
     vehicle_location: Optional[Dict[str, float]] = None  # {"lat": x, "lon": y, "alt": z}
-    vehicle_location_time: Optional[str] = None
     last_gga_sent_time: Optional[str] = None  # When we last sent GGA to NTRIP server
     gga_send_success: bool = False  # Whether last GGA send was successful
 
