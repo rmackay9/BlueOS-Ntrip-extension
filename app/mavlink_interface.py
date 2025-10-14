@@ -202,7 +202,7 @@ async def send_set_message_interval(
     Returns:
         bool: True if request sent successfully, False otherwise
     """
-    global _mavlink_system_id
+    global _mavlink_system_id, _mavlink_component_id, _mavlink_sequence
 
     if not mavlink2rest_url:
         print("⚠️  No mavlink2rest URL configured")
