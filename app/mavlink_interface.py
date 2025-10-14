@@ -10,8 +10,6 @@ from typing import Optional
 # Module-level variables for MAVLink and vehicle IDs
 _mavlink_system_id: Optional[int] = None
 _mavlink_component_id: Optional[int] = None
-_vehicle_system_id: Optional[int] = None
-_vehicle_component_id: Optional[int] = None
 
 # MAVLink sequence tracking
 _mavlink_sequence: int = 0
@@ -44,7 +42,7 @@ COMMAND_LONG_SET_MESSAGE_INTERVAL_TEMPLATE = """{{
 
 def init_sysids() -> None:
     """Initialize MAVLink system and component IDs from environment variables"""
-    global _mavlink_system_id, _mavlink_component_id, _vehicle_system_id, _vehicle_component_id
+    global _mavlink_system_id, _mavlink_component_id
 
     if _mavlink_system_id is None:
         _mavlink_system_id = int(os.environ.get("MAV_SYSTEM_ID", 1))
@@ -52,12 +50,6 @@ def init_sysids() -> None:
     if _mavlink_component_id is None:
         _mavlink_component_id = int(os.environ.get("MAV_COMPONENT_ID_ONBOARD_COMPUTER", 191))
         print(f"MAVLink CompId: {_mavlink_component_id}")
-    if _vehicle_system_id is None:
-        _vehicle_system_id = int(os.environ.get("MAV_SYSTEM_ID", 1))
-        print(f"Vehicle SysId: {_vehicle_system_id}")
-    if _vehicle_component_id is None:
-        _vehicle_component_id = int(os.environ.get("MAV_COMPONENT_ID", 1))
-        print(f"Vehicle CompId: {_vehicle_component_id}")
 
 
 async def get_vehicle_location(mavlink2rest_url: str) -> Optional[tuple]:
@@ -70,7 +62,7 @@ async def get_vehicle_location(mavlink2rest_url: str) -> Optional[tuple]:
     Returns:
         tuple: (lat, lon, alt) in decimal degrees and meters, or None if unavailable
     """
-    global _vehicle_system_id, _vehicle_component_id
+    global _mavlink_system_id
 
     if not mavlink2rest_url:
         return None
@@ -85,7 +77,7 @@ async def get_vehicle_location(mavlink2rest_url: str) -> Optional[tuple]:
             message_types = ['GLOBAL_POSITION_INT', 'GPS_RAW_INT']
 
             for msg_type in message_types:
-                api_path = f"{mavlink2rest_url}/mavlink/vehicles/{_vehicle_system_id}/components/{_vehicle_component_id}/messages/{msg_type}/message"
+                api_path = f"{mavlink2rest_url}/mavlink/vehicles/{_mavlink_system_id}/components/1/messages/{msg_type}/message"
 
                 try:
                     async with session.get(api_path) as response:
@@ -210,7 +202,7 @@ async def send_set_message_interval(
     Returns:
         bool: True if request sent successfully, False otherwise
     """
-    global _mavlink_system_id, _mavlink_component_id, _vehicle_system_id, _vehicle_component_id
+    global _mavlink_system_id
 
     if not mavlink2rest_url:
         print("⚠️  No mavlink2rest URL configured")
@@ -228,8 +220,8 @@ async def send_set_message_interval(
         sysid=_mavlink_system_id,
         component_id=_mavlink_component_id,
         sequence=_mavlink_sequence,
-        target_system=_vehicle_system_id,
-        target_component=_vehicle_component_id,
+        target_system=_mavlink_system_id,
+        target_component=1,
         message_id=message_id,
         interval_us=interval_us,
         param3=0,
@@ -248,7 +240,7 @@ async def send_set_message_interval(
                 headers={"Content-Type": "application/json"}
             ) as response:
                 if response.status == 200:
-                    print(f"✅ Requested message ID {message_id} at {interval_hz:.1f}Hz from vehicle (sys:{_vehicle_system_id}, comp:{_vehicle_component_id})")
+                    print(f"✅ Requested message ID {message_id} at {interval_hz:.1f}Hz from vehicle (sys:{_mavlink_system_id}, comp:1)")
                     return True
                 else:
                     response_text = await response.text()
